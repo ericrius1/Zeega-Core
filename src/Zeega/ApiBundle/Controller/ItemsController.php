@@ -86,6 +86,61 @@ class ItemsController extends ApiBaseController
         }
     }
 
+    public function getItemsParserPersistAction()
+    {
+        try {
+            $apiKey = $this->getRequest()->query->has('api_key') ? $this->getRequest()->query->get('api_key') : null;
+            $user = $this->getUser( $apiKey );           
+            
+            if ( !isset($user) ) {
+                return parent::getStatusResponse(401);   
+            }
+            
+            if (!$this->getRequest()->query->has('url')) {
+                return parent::getStatusResponse(400, "The url parameter is mandatory.");
+            }
+
+            $url = $this->getRequest()->query->get('url');
+
+            $parserService = $this->get('zeega_parser');
+            $parser = $parserService->getParser($url);
+
+            if ( null !== $parser && is_array($parser) ) {
+                if( isset($parser["config"]) && isset($parser["config"]["is_set"]) && isset($parser["domain"]) ) {
+                    $isSet = $parser["config"]["is_set"];
+                    $parserId = $parser["id"];
+                    $parserDomain = $parser["domain"];
+
+                    if( True === $isSet || ($parserDomain === "dropbox.com" && $parserDomain === "facebook.com") ) {
+                        $queue = $this->get('zeega_queue');
+                        $taskId = $queue->enqueueTask("zeega.tasks.ingest",array($url, $user->getId()), "ingestion");
+                        
+                        return new Response($taskId);
+                    } else {
+                        $items = $parserService->loadById($parserDomain, $parserId, false, $user->getId(), array("regex_matches" => $parser["regex_matches"]));
+                        
+                        if( isset($items["items"]) && is_object($items["items"][0]) ) {
+                            $item = $items["items"][0];
+                            $item->setUser($user);
+                            $item->setEnabled(true);
+                            $item->setPublished(true);
+                            
+                            $em = $this->getDoctrine()->getEntityManager();
+                            $em->persist($item);
+                            $em->flush();
+
+                            return parent::getStatusResponse(200, "Item saved");
+                        }
+                    }
+                }
+            }
+        } catch ( \BadFunctionCallException $e ) {
+            return parent::getStatusResponse( 422, $e->getMessage() );
+        } catch (\Exception $e) {
+            return parent::getStatusResponse( 500, $e->getMessage() );
+        }
+    }
+
     public function getItemsRejectedAction()
     {
         try {
