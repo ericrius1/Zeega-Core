@@ -24,6 +24,29 @@ class ParserService
 		$this->doctrine = $doctrine;
     }
     
+    public function getParser($url)
+    {
+        if( !isset($url) ) { 
+            throw new \BadFunctionCallException('The url is mandatory');
+        }
+
+        $domainName = self::getDomainFromUrl($url);                                                           // get the domain name from the url
+        $config = self::loadConfig();                                                                         // load the configfile from Resources/config/zeega/Parser.yml
+                
+        if ( array_key_exists($domainName, $config["zeega.parsers"]) ) {                                      // check if this domain is supported and exists on the config file            
+            $availableParsers = $config["zeega.parsers"][$domainName];                                        // the domain is supported - load the parsers and check if there is a parser defined this url
+            
+            foreach ( $availableParsers as $parserName => $parserConfig ) {                                   // loop over all domain parsers
+                if ( preg_match($parserConfig["regex"], $url, $matches) ) {
+
+                    return array( "domain" => $domainName, "id" => $parserName, "config" => $parserConfig, "url" => $url, "regex_matches" => $matches );
+                }
+            }                                     
+        }
+
+        return null;
+    }
+
     /**
      * Parses a url and returns a Zeega item if the url is valid and supported.
      *
@@ -33,42 +56,40 @@ class ParserService
      */
 	public function load($url, $loadChildItems = false, $userId = -1)
 	{
-	    $domainName = self::getDomainFromUrl($url);                                                           // get the domain name from the url
-        $config = self::loadConfig();                                                                         // load the configfile from Resources/config/zeega/Parser.yml
-	    	    
-	    if(array_key_exists($domainName, $config["zeega.parsers"])) {                                         // check if this domain is supported and exists on the config file	        
-	        $availableParsers = $config["zeega.parsers"][$domainName];                                        // the domain is supported - load the parsers and check if there is a parser defined this url
-	        
-	        foreach ($availableParsers as $parserName => $parserConfig) {                                     // loop over all domain parsers
-    			if (preg_match($parserConfig["regex"], $url, $matches)) {                                     
-                    $em = $this->doctrine->getEntityManager();                                                
-                        			    
-    			    if(isset($parserConfig["parameters"]) && count($parserConfig["parameters"]) > 0) {        // we have a match - let's check if there are extra parameters defined in the config file
-    			        $parameters = $parserConfig["parameters"];
-    			    } else {
-    			        $parameters = array();
-    			    }
-    				
-                    if($userId != -1) {                                                                       // load the user if a user id was provided
-                        $user = $em->getRepository('ZeegaDataBundle:User')->findOneById($userId);             
-                    } else {
-                        $user = $this->securityContext->getToken()->getUser();    
-                    }
-                                                                                                              // TO-DO: check for null user
-    				$parameters["regex_matches"] = $matches;                                                  // add the regex matches from above to the parameters array
-    				$parameters["load_child_items"] = $loadChildItems;                                        // load a single item vs load all them (initial display vs ingestion)
-    				$parameters["user"] = $user;                                                              // add the user to the parameters to avoid injecting it in all the parsers
-    				$parameters["entityManager"] = $em;                                                       // add the em to the parameters to avoid injecting it in all the parsers
+        $parser = self::getParser($url);
 
-    				$parserClass = $parserConfig["parser_class"];                                             // get the parser class name
-                    $parserMethod = new ReflectionMethod($parserClass, 'load');                               // instantiate the parser class using reflection
+        if( null !== $parser && is_array($parser) ) {
+            if( isset($parser["regex_matches"]) && isset($parser["config"])) {
+                $matches = $parser["regex_matches"];
+                $parserConfig = $parser["config"];
 
-    				return $parserMethod->invokeArgs(new $parserClass, array($url,$parameters));              // invoke the parser load method
-    		    }
-    		}
-	    }
+                $em = $this->doctrine->getEntityManager();                                                
+                                    
+                if(isset($parserConfig["parameters"]) && count($parserConfig["parameters"]) > 0) {        // we have a match - let's check if there are extra parameters defined in the config file
+                    $parameters = $parserConfig["parameters"];
+                } else {
+                    $parameters = array();
+                }
+                
+                if($userId != -1) {                                                                       // load the user if a user id was provided
+                    $user = $em->getRepository('ZeegaDataBundle:User')->findOneById($userId);             
+                } else {
+                    $user = $this->securityContext->getToken()->getUser();    
+                }
+                                                                                                          // TO-DO: check for null user
+                $parameters["regex_matches"] = $matches;                                                  // add the regex matches from above to the parameters array
+                $parameters["load_child_items"] = $loadChildItems;                                        // load a single item vs load all them (initial display vs ingestion)
+                $parameters["user"] = $user;                                                              // add the user to the parameters to avoid injecting it in all the parsers
+                $parameters["entityManager"] = $em;                                                       // add the em to the parameters to avoid injecting it in all the parsers
 
-		$parameters = array();
+                $parserClass = $parserConfig["parser_class"];                                             // get the parser class name
+                $parserMethod = new ReflectionMethod($parserClass, 'load');                               // instantiate the parser class using reflection
+
+                return $parserMethod->invokeArgs(new $parserClass, array($url,$parameters));              // invoke the parser load method
+            }
+        }
+
+        $parameters = array();
 	    $parameters["hostname"] = $this->hostname;
 		$parameters["directory"] = $this->directory;
 	    $parser = new ParserAbsoluteUrl;
