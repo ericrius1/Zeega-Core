@@ -133,7 +133,11 @@ Zeega\DataBundle\Entity\Item:
             type: integer
             length: integer
             nullable: true
-
+        hash: 
+            type: string
+            length: 40
+            nullable: true
+            unique: true
     indexes:
         media_date_created_index:
             columns: [media_date_created]

@@ -953,6 +953,36 @@ class Item
      */
     public function onPrePersist()
     {
-        // Add your code here
+        $this->hash = sha1($this->getUserId().$this->getAttributionUri());
+
+        return $this;
+    }
+    /**
+     * @var string $hash
+     */
+    private $hash;
+
+
+    /**
+     * Set hash
+     *
+     * @param string $hash
+     * @return Item
+     */
+    public function setHash($hash)
+    {
+        $this->hash = $hash;
+    
+        return $this;
+    }
+
+    /**
+     * Get hash
+     *
+     * @return string 
+     */
+    public function getHash()
+    {
+        return $this->hash;
     }
 }
