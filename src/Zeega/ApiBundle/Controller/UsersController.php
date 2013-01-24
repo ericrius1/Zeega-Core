@@ -182,7 +182,7 @@ class UsersController extends BaseController
 				$imageName = uniqid() . ".jpg";
 				$imagePath = $this->container->getParameter('path') . "/users/profileimages/";
 				$imageTempPath = $this->container->getParameter('path')  . "/tmp/";
-				$imageWebPath = $this->container->getParameter('hostname') . $this->container->getParameter('directory') . "content/users/profileimages/";
+				$imageWebPath = "http:" . $this->container->getParameter('hostname') . $this->container->getParameter('directory') . "content/users/profileimages/";
 				
 				$imageFile->move($imageTempPath, $imageFile->getClientOriginalName());
 				$square = new \Imagick($imageTempPath . $imageFile->getClientOriginalName());
