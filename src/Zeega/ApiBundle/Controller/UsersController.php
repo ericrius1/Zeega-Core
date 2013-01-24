@@ -182,7 +182,7 @@ class UsersController extends BaseController
 				$imageName = uniqid() . ".jpg";
 				$imagePath = $this->container->getParameter('path') . "/users/profileimages/";
 				$imageTempPath = $this->container->getParameter('path')  . "/tmp/";
-				$imageWebPath = "http:" . $this->container->getParameter('hostname') . $this->container->getParameter('directory') . "content/users/profileimages/";
+				$imageWebPath = $this->container->getParameter('hostname') . $this->container->getParameter('directory') . "content/users/profileimages/";
 				
 				$imageFile->move($imageTempPath, $imageFile->getClientOriginalName());
 				$square = new \Imagick($imageTempPath . $imageFile->getClientOriginalName());
@@ -209,7 +209,10 @@ class UsersController extends BaseController
 		        $em->flush();
 		        
 		        $imageWebPath = $imageWebPath . $imageName;
-		        return new Response("{status: 'Success', thumbnail_url: '$imageWebPath'}"); 
+		        $response = new Response("{status: 'Success', thumbnail_url: '$imageWebPath'}"); 
+                        $response->headers->set('Content-Type', 'text/html');
+
+                        return $response;
 			}
 		}
 		
