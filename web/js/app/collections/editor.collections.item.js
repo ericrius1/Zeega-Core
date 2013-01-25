@@ -20,26 +20,27 @@
 		defaults : {
 			query : '',
 			page : 1,
-			content : '',
+			content : '-Project AND -Collection',
 			collection : '',
-			user : '-1',
 			site : sessionStorage.getItem('siteid'),
 			add : false
 		},
 
-		initialize : function(){ this.on('change', this.onChange, this ); },
+		initialize : function(){
+			this.set({user : '-1'});
+		},
 		
-		onChange : function()
-		{
+
+		update : function( updates ){
+			
+			console.log('SEARCH :: update called', updates);
+			this.set(updates,{silent:true});
 			this.trigger('search');
 		},
+
 		reset : function( options )
 		{
-
-			var user=this.get('user');
-			var opts = _.extend({silent:true}, options);
-			this.set(this.defaults,opts);
-			this.set({'user':user});
+			this.set(this.defaults,options);
 			this.trigger('search');
 			return this;
 		}
@@ -60,11 +61,8 @@
 				base = zeega.app.url_prefix + "api/items/search?sort=date-desc";
 			}
 
-			if(_.isUndefined(this.search.get('content'))||this.search.get('content')===""){
-				this.search.set({"content":"-project AND -Collection"});
-			}
 			
-			if(this.search.get('query') === '') {
+			if(this.search.get('query') === '' && this.search.get('user')==-1&&this.search.get('content')==='-Project AND -Collection') {
 				base = base + "&data_source=db";
 			}
 
@@ -85,6 +83,7 @@
 		
 		onSearch : function()
 		{
+			console.log('onSearch');
 			var _this = this;
 			this.fetch({add: this.search.get('add')}).success(function(){
 				_this.trigger('reset');

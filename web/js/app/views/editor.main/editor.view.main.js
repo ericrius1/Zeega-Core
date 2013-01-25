@@ -60,11 +60,11 @@
 		{
 			var _this = this;
 			if( $('#search-input').val() !== '' ) {
-				zeega.app.items.search.set({ query : $('#search-input').val(), page:1, add:false });
+				zeega.app.items.search.update({ query : $('#search-input').val(), page:1, add:false });
 			}
 			else {
 				if($('#database-flash').is(':visible')) $('#database-flash').hide('blind',{direction:'vertical'},500, function(){ _this.updateLayerListsContainerHeight(); } );
-				zeega.app.items.search.reset({silent:false});
+				zeega.app.items.search.reset();
 			}
 		},
 
@@ -95,8 +95,8 @@
 			if($('#zeega-community-view-toggle').hasClass('my-media'))
 			{
 				$('#zeega-community-view-toggle .menu-verbose-title').html('switch to community media');
-				zeega.app.items.search.set({"user":"-1"});
 				$('#search-input').attr({"placeholder":"search my media"});
+				zeega.app.items.search.set({"user":"-1"});
 				
 			} else {
 				$('#zeega-community-view-toggle .menu-verbose-title').html('switch to my media');
@@ -112,23 +112,19 @@
 		{
 			var _this = this;
 			var contentFilter = $(e.target).data('filter');
+
 			$('#zeega-item-database-list').scrollTop(0);
 
 			if( contentFilter != 'reset' )
 			{
 				$('#database-flash').html('filtered by: '+ contentFilter );
 				if($('#database-flash').is(':hidden')) $('#database-flash').show('blind',{direction:'vertical'},500, function(){ _this.updateLayerListsContainerHeight(); });
-				zeega.app.items.search.set({'content':contentFilter,'add':false,'page':'1'});
+				zeega.app.items.search.update({'content':contentFilter,'add':false,'page':'1'});
 
 			}
 			else
 			{
-					
-				//this is redundant
-				//if($('#database-flash').is(':visible')) $('#database-flash').hide('blind',{direction:'vertical'},500, function(){ _this.updateLayerListsContainerHeight(); } );
-				
-				zeega.app.items.search.reset({silent:false});
-				this.onSearchEscape();
+				zeega.app.items.search.reset();
 			}
 		},
 
