@@ -91,20 +91,17 @@
 
 		toggleCommunityView : function()
 		{
-			$('#zeega-community-view-toggle').toggleClass('my-media');
-			if($('#zeega-community-view-toggle').hasClass('my-media'))
-			{
-				$('#zeega-community-view-toggle .menu-verbose-title').html('switch to community media');
+			var _this=this;
+			if(zeega.app.items.search.toggleUserFilter()){
+				$('#zeega-community-view-toggle').removeClass('my-media');
+				$('#zeega-community-view-toggle .menu-verbose-title').html('community media');
 				$('#search-input').attr({"placeholder":"search my media"});
-				zeega.app.items.search.set({"user":"-1"});
-				
-			} else {
-				$('#zeega-community-view-toggle .menu-verbose-title').html('switch to my media');
+			}  else {
+				$('#zeega-community-view-toggle').addClass('my-media');
+				$('#zeega-community-view-toggle .menu-verbose-title').html('return to my media');
 				$('#search-input').attr({"placeholder":"search community media"});
-				zeega.app.items.search.set({"user":"0"});
 			}
-			
-			this.onSearch();
+			if($('#database-flash').is(':visible')) $('#database-flash').hide('blind',{direction:'vertical'},500, function(){ _this.updateLayerListsContainerHeight(); } );
 			return false;
 		},
 
@@ -115,7 +112,7 @@
 
 			$('#zeega-item-database-list').scrollTop(0);
 
-			if( contentFilter != 'reset' )
+			if( contentFilter != 'reset' && contentFilter != 'All' )
 			{
 				$('#database-flash').html('filtered by: '+ contentFilter );
 				if($('#database-flash').is(':hidden')) $('#database-flash').show('blind',{direction:'vertical'},500, function(){ _this.updateLayerListsContainerHeight(); });
@@ -124,7 +121,13 @@
 			}
 			else
 			{
-				zeega.app.items.search.reset();
+				if($('#database-flash').is(':visible')) $('#database-flash').hide('blind',{direction:'vertical'},500, function(){ _this.updateLayerListsContainerHeight(); } );
+				if(contentFilter=="All"){
+					zeega.app.items.search.update({'content':'-Project'});
+				} else {
+					zeega.app.items.search.reset();
+				}
+				
 			}
 		},
 

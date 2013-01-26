@@ -79,7 +79,13 @@
 		//item events
 		previewItem: function()
 		{
-			this.model.trigger('preview_item',this.model.id);
+			console.log(this.model, this.model.get("media_type"));
+			if(this.model.get("media_type")=="Collection"||this.model.get("media_type")=="Dynamic Collection"){
+				zeega.app.items.search.update({"collection":this.model.id});
+			} else {
+				this.model.trigger('preview_item',this.model.id);
+			}
+			
 		},
 
 		getTemplate : function()

@@ -20,29 +20,58 @@
 		defaults : {
 			query : '',
 			page : 1,
-			content : '-Project AND -Collection',
+			content : '-Project',
 			collection : '',
 			site : sessionStorage.getItem('siteid'),
 			add : false
 		},
 
 		initialize : function(){
-			this.set({user : '-1'});
+			this.set({user : 1});
 		},
 		
 
 		update : function( updates ){
-			
-			console.log('SEARCH :: update called', updates);
 			this.set(updates,{silent:true});
 			this.trigger('search');
+		},
+
+		toggleUserFilter : function (isCommunity){
+			if(this.get('user')){
+				this.set('user',0);
+			} else {
+				this.set('user', 1);
+			}
+			this.reset();
+
+			return this.get('user');
 		},
 
 		reset : function( options )
 		{
 			this.set(this.defaults,options);
 			this.trigger('search');
+
 			return this;
+		},
+
+		generateQueryURL : function (){
+			var base = zeega.app.url_prefix + "api/items/search?sort=date-desc",
+				queryTemplate = '&page=<%= page %><% if( query ){ %>&q=<%= query %><% } %><% if(content){ %>&type=<%= content %><% } %><% if(collection){ %>&collection=<%= collection %><% } %>';
+			
+
+			if(this.get("user")){
+				base += "&user=-1";
+			} else if(this.get('collection')==="") {
+				base += "&collection=78702";
+			}
+			
+
+			if(this.get('query') === '' && this.get('user') && this.get('content')==='-Project' || true) {
+				base += "&data_source=db";
+			}
+
+			return base + _.template( queryTemplate, this.toJSON() );
 		}
 	});
 
@@ -54,22 +83,7 @@
 
 		url: function()
 		{
-			var base;
-			if(this.search.get('user')==-1){
-				base = zeega.app.url_prefix + "api/items/search?sort=date-desc&user=-1";
-			} else {
-				base = zeega.app.url_prefix + "api/items/search?sort=date-desc";
-			}
-
-			
-			if(this.search.get('query') === '' && this.search.get('user')==-1&&this.search.get('content')==='-Project AND -Collection') {
-				base = base + "&data_source=db";
-			}
-
-
-			var queryTemplate = '&page=<%= page %><% if( query ){ %>&q=<%= query %><% } %><% if(content){ %>&type=<%= content %><% } %><% if(collection){ %>&collection=<%= collection %><% } %>';
-			var url = base + _.template( queryTemplate, this.search.toJSON() );
-			return url;
+			return this.search.generateQueryURL();
 		},
 
 		initialize : function()
