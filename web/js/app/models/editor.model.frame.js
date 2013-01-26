@@ -70,6 +70,7 @@
                     }
                 }
             });
+
             _.each( _.compact( layerArray ), function( layer, i ) {
                 layer.layerIndex = i;
             });

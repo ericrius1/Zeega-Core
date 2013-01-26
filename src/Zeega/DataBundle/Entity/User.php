@@ -6,70 +6,149 @@ use Doctrine\ORM\Mapping as ORM;
 use FOS\UserBundle\Entity\User as BaseUser;
 
 /**
- * Zeega\DataBundle\Entity\User
+ * @ORM\Table(name="zuser")
+ * @ORM\Entity
  */
 class User extends BaseUser
 {
-    /**
-     * @var integer $id
+     /**
+     * @var integer
+     *
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
 
     /**
-     * @var string $display_name
+     * @var string
+     *
+     * @ORM\Column(name="display_name", type="string", length=255, nullable=true)
      */
-    private $display_name;
+    protected $displayName;
 
     /**
-     * @var string $bio
+    * Set display_name
+    *
+    * @param string $displayName
+    * @return User
+    */
+    public function setDisplayName($displayName)
+    {
+        $this->displayName = $displayName;
+    
+        return $this;
+    }
+
+    /**
+    * Get display_name
+    *
+    * @return string
+    */
+    public function getDisplayName()
+    {
+        return $this->displayName;
+    }
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="bio", type="text", nullable=true)
      */
     private $bio;
 
     /**
-     * @var string $thumb_url
+     * @var string
+     *
+     * @ORM\Column(name="thumb_url", type="string", length=255, nullable=true)
      */
-    private $thumb_url = "http://static.zeega.org/community/templates/default_profile.jpeg";
+    private $thumbUrl;
 
     /**
-     * @var \DateTime $created_at
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime", nullable=true)
      */
-    private $created_at;
+    private $createdAt;
 
     /**
-     * @var string $user_type
-     */
-    private $user_type;
-
-    /**
-     * @var string $location
+     * @var string
+     *
+     * @ORM\Column(name="location", type="string", length=140, nullable=true)
      */
     private $location;
 
     /**
-     * @var float $location_latitude
+     * @var float
+     *
+     * @ORM\Column(name="location_latitude", type="float", nullable=true)
      */
-    private $location_latitude;
+    private $locationLatitude;
 
     /**
-     * @var float $location_longitude
+     * @var float
+     *
+     * @ORM\Column(name="location_longitude", type="float", nullable=true)
      */
-    private $location_longitude;
+    private $locationLongitude;
 
     /**
-     * @var string $background_image_url
+     * @var string
+     *
+     * @ORM\Column(name="background_image_url", type="string", length=255, nullable=true)
      */
-    private $background_image_url;
+    private $backgroundImageUrl;
 
     /**
-     * @var string $dropbox_delta
+     * @var string
+     *
+     * @ORM\Column(name="dropbox_delta", type="string", length=255, nullable=true)
      */
-    private $dropbox_delta;
+    private $dropboxDelta;
 
     /**
-     * @var string $idea
+     * @var string
+     *
+     * @ORM\Column(name="idea", type="text", nullable=true)
      */
     private $idea;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="api_key", type="string", length=25, nullable=true)
+     */
+    private $apiKey;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\ManyToMany(targetEntity="Project", mappedBy="user")
+     */
+    private $project;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="twitter_id", type="string", nullable=true)
+     */
+    private $twitterId;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="twitter_username", type="string", nullable=true)
+     */
+
+    private $twitterUsername;
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->project = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
     /**
      * Get id
@@ -79,29 +158,6 @@ class User extends BaseUser
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * Set display_name
-     *
-     * @param string $displayName
-     * @return User
-     */
-    public function setDisplayName($displayName)
-    {
-        $this->display_name = $displayName;
-    
-        return $this;
-    }
-
-    /**
-     * Get display_name
-     *
-     * @return string 
-     */
-    public function getDisplayName()
-    {
-        return $this->display_name;
     }
 
     /**
@@ -128,72 +184,49 @@ class User extends BaseUser
     }
 
     /**
-     * Set thumb_url
+     * Set thumbUrl
      *
      * @param string $thumbUrl
      * @return User
      */
     public function setThumbUrl($thumbUrl)
     {
-        $this->thumb_url = $thumbUrl;
+        $this->thumbUrl = $thumbUrl;
     
         return $this;
     }
 
     /**
-     * Get thumb_url
+     * Get thumbUrl
      *
      * @return string 
      */
     public function getThumbUrl()
     {
-        return $this->thumb_url;
+        return $this->thumbUrl;
     }
 
     /**
-     * Set created_at
+     * Set createdAt
      *
      * @param \DateTime $createdAt
      * @return User
      */
     public function setCreatedAt($createdAt)
     {
-        $this->created_at = $createdAt;
+        $this->createdAt = $createdAt;
     
         return $this;
     }
 
     /**
-     * Get created_at
+     * Get createdAt
      *
      * @return \DateTime 
      */
     public function getCreatedAt()
     {
-        return $this->created_at;
-    }
-
-    /**
-     * Set user_type
-     *
-     * @param string $userType
-     * @return User
-     */
-    public function setUserType($userType)
-    {
-        $this->user_type = $userType;
-    
-        return $this;
-    }
-
-    /**
-     * Get user_type
-     *
-     * @return string 
-     */
-    public function getUserType()
-    {
-        return $this->user_type;
+        return $this->createdAt;
     }
 
     /**
@@ -220,95 +253,95 @@ class User extends BaseUser
     }
 
     /**
-     * Set location_latitude
+     * Set locationLatitude
      *
      * @param float $locationLatitude
      * @return User
      */
     public function setLocationLatitude($locationLatitude)
     {
-        $this->location_latitude = $locationLatitude;
+        $this->locationLatitude = $locationLatitude;
     
         return $this;
     }
 
     /**
-     * Get location_latitude
+     * Get locationLatitude
      *
      * @return float 
      */
     public function getLocationLatitude()
     {
-        return $this->location_latitude;
+        return $this->locationLatitude;
     }
 
     /**
-     * Set location_longitude
+     * Set locationLongitude
      *
      * @param float $locationLongitude
      * @return User
      */
     public function setLocationLongitude($locationLongitude)
     {
-        $this->location_longitude = $locationLongitude;
+        $this->locationLongitude = $locationLongitude;
     
         return $this;
     }
 
     /**
-     * Get location_longitude
+     * Get locationLongitude
      *
      * @return float 
      */
     public function getLocationLongitude()
     {
-        return $this->location_longitude;
+        return $this->locationLongitude;
     }
 
     /**
-     * Set background_image_url
+     * Set backgroundImageUrl
      *
      * @param string $backgroundImageUrl
      * @return User
      */
     public function setBackgroundImageUrl($backgroundImageUrl)
     {
-        $this->background_image_url = $backgroundImageUrl;
+        $this->backgroundImageUrl = $backgroundImageUrl;
     
         return $this;
     }
 
     /**
-     * Get background_image_url
+     * Get backgroundImageUrl
      *
      * @return string 
      */
     public function getBackgroundImageUrl()
     {
-        return $this->background_image_url;
+        return $this->backgroundImageUrl;
     }
 
     /**
-     * Set dropbox_delta
+     * Set dropboxDelta
      *
      * @param string $dropboxDelta
      * @return User
      */
     public function setDropboxDelta($dropboxDelta)
     {
-        $this->dropbox_delta = $dropboxDelta;
+        $this->dropboxDelta = $dropboxDelta;
     
         return $this;
     }
 
     /**
-     * Get dropbox_delta
+     * Get dropboxDelta
      *
      * @return string 
      */
     public function getDropboxDelta()
     {
-        return $this->dropbox_delta;
+        return $this->dropboxDelta;
     }
 
     /**
@@ -333,32 +366,106 @@ class User extends BaseUser
     {
         return $this->idea;
     }
-    /**
-     * @var string $api_key
-     */
-    private $api_key;
-
 
     /**
-     * Set api_key
+     * Set apiKey
      *
      * @param string $apiKey
      * @return User
      */
     public function setApiKey($apiKey)
     {
-        $this->api_key = $apiKey;
+        $this->apiKey = $apiKey;
     
         return $this;
     }
 
     /**
-     * Get api_key
+     * Get apiKey
      *
      * @return string 
      */
     public function getApiKey()
     {
-        return $this->api_key;
+        return $this->apiKey;
+    }
+
+    /**
+     * Set twitterId
+     *
+     * @param string $twitterId
+     * @return User
+     */
+    public function setTwitterId($twitterId)
+    {
+        $this->twitterId = $twitterId;
+    
+        return $this;
+    }
+
+    /**
+     * Get twitterId
+     *
+     * @return string 
+     */
+    public function getTwitterId()
+    {
+        return $this->twitterId;
+    }
+
+    /**
+     * Set twitterUsername
+     *
+     * @param string $twitterUsername
+     * @return User
+     */
+    public function setTwitterUsername($twitterUsername)
+    {
+        $this->twitterUsername = $twitterUsername;
+    
+        return $this;
+    }
+
+    /**
+     * Get twitterUsername
+     *
+     * @return string 
+     */
+    public function getTwitterUsername()
+    {
+        return $this->twitterUsername;
+    }
+
+    /**
+     * Add project
+     *
+     * @param \Zeega\DataBundle\Entity\Project $project
+     * @return User
+     */
+    public function addProject(\Zeega\DataBundle\Entity\Project $project)
+    {
+        $this->project[] = $project;
+    
+        return $this;
+    }
+
+    /**
+     * Remove project
+     *
+     * @param \Zeega\DataBundle\Entity\Project $project
+     */
+    public function removeProject(\Zeega\DataBundle\Entity\Project $project)
+    {
+        $this->project->removeElement($project);
+    }
+
+    /**
+     * Get project
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getProject()
+    {
+        return $this->project;
     }
 }
