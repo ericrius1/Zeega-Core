@@ -3,6 +3,7 @@
 namespace Zeega\DataBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Mapping\Table;
 
 class LayerRepository extends EntityRepository
 {

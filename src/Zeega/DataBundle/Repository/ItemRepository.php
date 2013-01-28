@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\Common\Collections;
 use DateInterval;
 use Doctrine\ORM\Query\ResultSetMapping;
+use Doctrine\ORM\Mapping\Table;
 use DateTime;
 
 class ItemRepository extends EntityRepository
