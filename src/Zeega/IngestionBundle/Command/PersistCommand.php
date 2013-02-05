@@ -40,6 +40,7 @@ class PersistCommand extends ContainerAwareCommand
              ->addOption('file_path', null, InputOption::VALUE_REQUIRED, 'Url of the item or collection to be ingested')
              ->addOption('user', null, InputOption::VALUE_REQUIRED, 'Url of the item or collection to be ingested')
              ->addOption('ingestor', null, InputOption::VALUE_REQUIRED, 'Url of the item or collection to be ingested')
+             ->addOption('check_for_duplicates', null, InputOption::VALUE_NONE,'If set, items that already exist on the database will not be imported')
              ->setHelp("Help");
     }
 
@@ -51,7 +52,8 @@ class PersistCommand extends ContainerAwareCommand
         $filePath = $input->getOption('file_path');
         $userId = $input->getOption('user');
         $ingestor = $input->getOption('ingestor');
-        
+        $duplicateCheck = $input->getOption('check_for_duplicates');
+
         if(null === $filePath || null === $userId || null === $ingestor) {
             $output->writeln('<info>Please run the operation with the --file_path, --ingestor and --user options to execute</info>');
         } else {
@@ -73,15 +75,23 @@ class PersistCommand extends ContainerAwareCommand
             }
 
             $itemService = $this->getContainer()->get('zeega.item');
+            $count = 0;
 
             foreach($items as $item) {
+                if( $duplicateCheck ) {
+                    $dbItem = $em->getRepository('ZeegaDataBundle:Item')->findOneBy(array("uri"=>$item["uri"], "user"=>$user));
+                    if( isset ($dbItem) ) {
+                        continue;
+                    }
+                } 
+                $count++;
                 $item = $itemService->parseItem($item, $user);
                 $em->persist($item);
             }
             
-            $em->flush($item);
+            $em->flush();
 
-            $output->writeln($item->getTitle());
+            $output->writeln("<info>Ingestion complete. $count items added to the database.</info>");
         }
     } 
 }
