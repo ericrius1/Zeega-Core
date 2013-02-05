@@ -87,6 +87,10 @@ class PersistCommand extends ContainerAwareCommand
                 $count++;
                 $item = $itemService->parseItem($item, $user);
                 $em->persist($item);
+
+                if ($count % 100 == 0) {
+                    $em->flush();
+                }
             }
             
             $em->flush();
