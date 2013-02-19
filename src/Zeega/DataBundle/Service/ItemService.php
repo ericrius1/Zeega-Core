@@ -74,6 +74,8 @@ class ItemService
 
         if(null !== $thumbnail) {
             $item->setThumbnailUrl($thumbnail);
+        } else if ( isset($itemArray['thumbnail_url']) ) {
+            $item->setThumbnailUrl($itemArray['thumbnail_url']);
         }
 
         if(isset($itemArray['media_date_created'])) {
