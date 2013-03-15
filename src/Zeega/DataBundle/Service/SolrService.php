@@ -46,7 +46,14 @@ class SolrService
                 $solrQuery->addSort('date_created', \Solarium_Query_Select::SORT_ASC);       
             } else if($query["sort"] == 'id-desc') {
                 $solrQuery->addSort('id', \Solarium_Query_Select::SORT_DESC);
+            } else if($query["sort"] == 'id-asc') {
+                $solrQuery->addSort('id', \Solarium_Query_Select::SORT_ASC);
+            } else if($query["sort"] == 'media-date-asc') {
+                $solrQuery->addSort('media_date_created', \Solarium_Query_Select::SORT_ASC);
+            } else if($query["sort"] == 'media-date-desc') {
+                $solrQuery->addSort('media_date_created', \Solarium_Query_Select::SORT_DESC);
             }
+
         }
 
         $queryString = '';
