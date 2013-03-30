@@ -393,36 +393,37 @@ class ItemsController extends ApiBaseController
             // authorization
             $apiKey = $this->getRequest()->query->has('api_key') ? $this->getRequest()->query->get('api_key') : null;
             $user = $this->getUser($apiKey);
-            if ( !isset($user) ) {
-                return parent::getStatusResponse(401);   
-            }
-
             $em = $this->getDoctrine()->getEntityManager();
             $item = $em->getRepository('ZeegaDataBundle:Item')->find($itemId);
             if (!$item) {
                 return parent::getStatusResponse( 400, "The child item with the id $itemId does not exist" );
-            }  
+            }
 
             $requestData = $this->getRequest()->request;        
             $itemService = $this->get('zeega.item');
             $itemRequestData = $requestData->all();
-            if(isset($itemRequestData["child_items"])) {
-                $itemRequestData["child_items"] = null;
-            }
-            $item = $itemService->parseItem($itemRequestData, $user, $item);
-            
-            if ( $this->isUserAdmin($user) || $this->isItemOwner($item, $user) ) {
-                $em->persist($item);
-                $em->flush();
-                $editable = $this->isUserAdmin($user) || $this->isItemOwner( $item, $user );
-                $itemView = $this->renderView('ZeegaApiBundle:Items:show.json.twig', array(
-                    "item" => $item,
-                    "editable" => $editable));
 
-                return new Response($itemView);
+            if ( !isset($user) || !$this->isItemOwner($item, $user) ) {
+                if(isset($itemRequestData["tags"])) {
+                    $item->setTags($itemRequestData["tags"]);  
+                }
             } else {
-                return parent::getStatusResponse(403);
+                if(isset($itemRequestData["child_items"])) {
+                    $itemRequestData["child_items"] = null;
+                }
+                $item = $itemService->parseItem($itemRequestData, $user, $item);
             }
+
+            $em->persist($item);
+            $em->flush();
+            $editable = $this->isUserAdmin($user) || $this->isItemOwner( $item, $user );
+            $itemView = $this->renderView('ZeegaApiBundle:Items:show.json.twig', array(
+                "item" => $item,
+                "editable" => $editable));
+
+            return new Response($itemView);
+
+            
         } catch ( \BadFunctionCallException $e ) {
             return parent::getStatusResponse(422, $e->getMessage());
         } catch ( \Exception $e ) {
