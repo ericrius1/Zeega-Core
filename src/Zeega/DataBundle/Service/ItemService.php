@@ -88,6 +88,9 @@ class ItemService
         
         if(isset($itemArray['media_creator_username'])) {
             $item->setMediaCreatorUsername($itemArray['media_creator_username']);
+        } else if (isset($user)) {
+            $displayName = $user->getDisplayName();
+            $item->setMediaCreatorUsername($displayName);
         }
 
         if(isset($itemArray['media_creator_realname'])) {
