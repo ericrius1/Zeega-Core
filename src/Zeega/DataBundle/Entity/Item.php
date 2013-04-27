@@ -953,6 +953,14 @@ class Item
      */
     public function onPrePersist()
     {
-        // Add your code here
+        $this->setDateUpdated(new \DateTime("now"));
+    }
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function onPreUpdate()
+    {
+        $this->setDateUpdated(new \DateTime("now"));
     }
 }
