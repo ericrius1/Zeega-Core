@@ -95,8 +95,11 @@ class ItemService
 
         if(isset($itemArray['media_creator_realname'])) {
             $item->setMediaCreatorRealname($itemArray['media_creator_realname']);
+        } else if (isset($user)) {
+            $displayName = $user->getDisplayName();
+            $item->setMediaCreatorRealname($displayName);
         }
-            
+    
         if(isset($itemArray['archive'])) {
             $item->setArchive($itemArray['archive']);  
         } 
