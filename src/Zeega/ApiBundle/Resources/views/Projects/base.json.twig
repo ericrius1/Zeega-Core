@@ -1,7 +1,8 @@
 {
 	"id" : {{ project.getId() | default("") }},
 	"user_id": {{ project.getUsers()[0].getId() | default("") | json_encode | raw}},
-	"title" : {{ project.getTitle() | default("") | json_encode | raw}},
+	"user_thumbnail": {{ project.getUsers()[0].getThumbUrl() | default(null) | json_encode | raw}},
+        "title" : {{ project.getTitle() | default("") | json_encode | raw}},
 	"date_created" : "{{ project.getDateCreated() is empty ? "" : project.getDateCreated()  | date("m/d/Y ") }}",
 	"date_updated" : "{{ project.getDateUpdated() is empty ? "" : project.getDateUpdated()  | date("U") }}",
 	"date_published" : "{{ project.getDatePublished() is empty ? "" : project.getDatePublished()  | date("U") }}",
