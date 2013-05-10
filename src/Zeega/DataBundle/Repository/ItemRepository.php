@@ -102,6 +102,22 @@ class ItemRepository extends DocumentRepository
         }
     }
     
+    public function findAndGroupByTag($query) {
+        $qb = $this->createQueryBuilder('Item')
+            ->field('homeTag')->exists(true)
+            ->map('function() { emit(this.homeTag, [this.id,this.description]); }')
+            ->reduce('function(k, vals) { if(vals.length > 1) {return tojson(vals)} else {return "blas"}; }');
+
+        $query = $qb->getQuery();
+        $users = $query->execute();
+        foreach ($users as $user) {
+            var_dump("{$user['_id']} {$user['value']}");
+            break;
+        }   
+        
+        return null;
+    }
+
     /*
     public function getTotalItems($query)
     {

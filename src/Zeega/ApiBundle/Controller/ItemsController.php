@@ -21,6 +21,13 @@ class ItemsController extends ApiBaseController
 {
     public function getItemsSearchAction()
     {
+        $queryParser = $this->get('zeega_query_parser');
+        $query = $queryParser->parseRequest($this->getRequest()->query);
+            
+        $results = $this->getDoctrine()->getRepository('ZeegaDataBundle:Item')->findAndGroupByTag($query);
+        
+        return new Response();
+   
         try {
             $queryParser = $this->get('zeega_query_parser');
             $query = $queryParser->parseRequest($this->getRequest()->query);
